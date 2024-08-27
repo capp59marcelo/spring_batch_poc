@@ -1,0 +1,15 @@
+services:
+  oracle-db:
+    image: wnameless/oracle-xe-11g-r2
+    container_name: oracle-db
+    environment:
+      - ORACLE_ALLOW_REMOTE=true
+      - ORACLE_PASSWORD=oracle
+    ports:
+      - 49161:1521
+    volumes:
+      - oracle-data:/u01/app/oracle/oracledata
+    restart: always
+
+volumes:
+  oracle-data:
