@@ -1,48 +1,44 @@
 package com.udemy.primeirobatch.config;
 
-import org.springframework.boot.jdbc.DataSourceBuilder;
+import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.boot.autoconfigure.batch.BatchDataSource;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
 
-    @Primary
-//    @Bean(name = "dfDataSource")
-    @Bean(name = "dataSource")
+    @Bean
+    @BatchDataSource
     public DataSource dataSource() {
-        return DataSourceBuilder.create()
-                .url("jdbc:oracle:thin:@localhost:49161:xe")
-                .password("oracle")
-                .username("system")
-                .driverClassName("oracle.jdbc.OracleDriver")
+        return new EmbeddedDatabaseBuilder()
+                .setName("jobDataSource")
+                .setType(EmbeddedDatabaseType.H2)
                 .build();
-
-//        return DataSourceBuilder.create()
-//                .url("jdbc:mysql://localhost:3306/db")
-//                .password("P@ssw0rd")
-//                .username("user")
-//                .driverClassName("com.mysql.cj.jdbc.Driver")
-//                .build();
     }
 
-//    @Bean
-//    public JobRepository jobRepository(PlatformTransactionManager transactionManager) throws Exception {
-//        JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
-//        factory.setTransactionManager(transactionManager);
-//        factory.setIsolationLevelForCreate("ISOLATION_SERIALIZABLE");
-//        factory.setMaxVarCharLength(255);
-//        return factory.getObject();
-//    }
+    @Bean
+    @Primary
+    @ConfigurationProperties("spring.datasource")
+    public DataSourceProperties dataSourceProperties() {
+        return new DataSourceProperties();
+    }
 
-//    @Bean
-//    @Primary
-//    public JpaTransactionManager jpaTransactionManager(DataSource dataSource) {
-//        final var transactionManager = new JpaTransactionManager();
-//        transactionManager.setDataSource(dataSource);
-//        return transactionManager;
-//    }
+    @Bean
+    @Primary
+    @ConfigurationProperties("spring.datasource.hikari")
+    public DataSource corpDatasource() {
+        return dataSourceProperties()
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+    }
+
 }
